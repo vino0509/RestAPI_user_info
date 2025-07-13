@@ -1,13 +1,15 @@
 from flask import Flask, jsonify, request
+import os
 
 app = Flask(__name__)
 
 # Fake DB (will reset on restart)
 users = [{"id": 1, "name": "Vinoth"}, {"id": 2, "name": "Sara"}]
 
-@app.route("/")
-def welcome():
-    return "Welcome"
+@app.route('/')
+def home():
+    return "Flask app deployed on Render!"
+    
 @app.route("/users", methods=["GET"])
 def get_users():
     return jsonify(users)
@@ -25,4 +27,6 @@ def delete_user(id):
     return jsonify({"message": f"User {id} deleted"})
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Use Render's PORT
+    app.run(host='0.0.0.0', port=port)
     app.run(debug=True)

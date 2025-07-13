@@ -4,7 +4,7 @@ import os
 app = Flask(__name__)
 
 # Fake DB (will reset on restart)
-users = [{"id": 1, "name": "Vinoth"}, {"id": 2, "name": "Sara"}]
+users = [{"id": 1, "name": "Vinoth"}, {"id": 2, "name": "Duruv"}]
 
 @app.route('/')
 def home():

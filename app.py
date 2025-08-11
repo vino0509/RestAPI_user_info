@@ -4,7 +4,7 @@ import os
 app = Flask(__name__)
 
 # Fake DB (will reset on restart)
-users = [{"id": 1, "name": "Vinoth"}, {"id": 2, "name": "Duruv"}]
+users = [{"id": 1, "name": "https://station-h.hexaware.com/apps/featured"}, {"id": 2, "name": "Duruv"}]
 
 @app.route('/')
 def home():
@@ -30,3 +30,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Use Render's PORT
     app.run(host='0.0.0.0', port=port)
     app.run(debug=True)
+

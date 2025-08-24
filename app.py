@@ -49,6 +49,8 @@ def add_user():
 
     with sqlite3.connect(DATABASE) as conn:
         if "name" in data:  # Single name
+            if not isinstance(data["name"], str):
+                abort(400, description="'name' must be a string")
             name = data["name"].strip()
             cursor = conn.execute("SELECT id FROM users WHERE name = ?", (name,))
             existing = cursor.fetchone()
@@ -60,7 +62,12 @@ def add_user():
                 results.append({"name": name, "message": "User added", "id": cursor.lastrowid})
 
         elif "names" in data:  # Multiple names
+            if not isinstance(data["names"], list):
+                abort(400, description="'names' must be a list of strings")
+
             for name in data["names"]:
+                if not isinstance(name, str):
+                    continue  # skip non-string values safely
                 name = name.strip()
                 cursor = conn.execute("SELECT id FROM users WHERE name = ?", (name,))
                 existing = cursor.fetchone()
@@ -106,4 +113,5 @@ if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+
 

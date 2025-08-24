@@ -42,24 +42,38 @@ def get_users():
 @app.route("/users", methods=["POST"])
 def add_user():
     data = request.json
-    if not data or "name" not in data:
-        abort(400, description="Bad Request: 'name' is required")
+    if not data:
+        abort(400, description="Bad Request: 'name' or 'names' is required")
 
-    name = data["name"].strip()
+    results = []
 
     with sqlite3.connect(DATABASE) as conn:
-        # Check if name already exists
-        cursor = conn.execute("SELECT id FROM users WHERE name = ?", (name,))
-        existing = cursor.fetchone()
-        if existing:
-            return jsonify({"message": "User already exists", "id": existing[0]}), 200
+        if "name" in data:  # Single name
+            name = data["name"].strip()
+            cursor = conn.execute("SELECT id FROM users WHERE name = ?", (name,))
+            existing = cursor.fetchone()
+            if existing:
+                results.append({"name": name, "message": "User already exists", "id": existing[0]})
+            else:
+                cursor = conn.execute("INSERT INTO users (name) VALUES (?)", (name,))
+                conn.commit()
+                results.append({"name": name, "message": "User added", "id": cursor.lastrowid})
 
-        # Insert new user
-        cursor = conn.execute("INSERT INTO users (name) VALUES (?)", (name,))
-        conn.commit()
-        new_id = cursor.lastrowid
+        elif "names" in data:  # Multiple names
+            for name in data["names"]:
+                name = name.strip()
+                cursor = conn.execute("SELECT id FROM users WHERE name = ?", (name,))
+                existing = cursor.fetchone()
+                if existing:
+                    results.append({"name": name, "message": "User already exists", "id": existing[0]})
+                else:
+                    cursor = conn.execute("INSERT INTO users (name) VALUES (?)", (name,))
+                    conn.commit()
+                    results.append({"name": name, "message": "User added", "id": cursor.lastrowid})
+        else:
+            abort(400, description="Bad Request: provide either 'name' or 'names'")
 
-    return jsonify({"message": "User added", "id": new_id, "name": name}), 201
+    return jsonify(results), 201
 
 # Update user
 @app.route("/users/<int:id>", methods=["PUT"])
@@ -92,3 +106,4 @@ if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+
